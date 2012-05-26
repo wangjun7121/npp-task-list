@@ -40,7 +40,7 @@ const TCHAR NPP_PLUGIN_NAME[] = TEXT("Task List Debug");
 //
 // Here define the number of your plugin commands
 //
-const int nbFunc = 1;
+const int nbFunc = 2;
 
 
 //

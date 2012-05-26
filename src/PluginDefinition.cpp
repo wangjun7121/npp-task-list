@@ -20,6 +20,7 @@
 
 #include <list>
 #include "TaskListDlg.h"
+#include "config.h"
 
 //TODO: refactor/rename
 
@@ -37,6 +38,22 @@ NppData nppData;
 
 #define DOCKABLE_DEMO_INDEX 15
 
+void reload_config_file()
+{
+	e_config_load_result load_result= load_config_file();
+
+	if (load_result==_config_load_default_failed)
+	{
+		MessageBox(NULL, TEXT("Failed to load default config, Task List will not work"), TEXT("NPP Task List"), MB_OK);
+	}
+	else if (load_result==_config_load_file_failed)
+	{
+		MessageBox(NULL, TEXT("Failed loading config file, falling back to defaults (only 'TODO:' is supported)"), TEXT("NPP Task List"), MB_OK);
+	}
+
+	findTasks();
+}
+
 //
 // Initialize your plugin data here
 // It will be called while plugin loading   
@@ -44,6 +61,7 @@ void pluginInit(HANDLE hModule)
 {
 	// Initialize dockable demo dialog
 	_goToLine.init((HINSTANCE)hModule, NULL);
+	reload_config_file();
 }
 
 //
@@ -51,6 +69,7 @@ void pluginInit(HANDLE hModule)
 //
 void pluginCleanUp()
 {
+	unload_config_file();
 }
 
 //
@@ -69,7 +88,8 @@ void commandMenuInit()
     //            ShortcutKey *shortcut,          // optional. Define a shortcut to trigger this command
     //            bool check0nInit                // optional. Make this menu item be checked visually
     //            );
-    setCommand(0, TEXT("Show Task List"), displayDialog, NULL, false);
+    setCommand(0, TEXT("Show Task List"), &displayDialog, NULL, false);
+	setCommand(1, TEXT("Reload Task List Configuration"), &reload_config_file, NULL, false);
 }
 
 //
@@ -137,38 +157,56 @@ void findTasks()
 	//get length SCI_GETLENGTH
     int length = ::SendMessage(curScintilla, SCI_GETLENGTH, 0, 0);
 	//search for todos: (starting at character 0) SCI_FINDTEXT
-	char* searchPattern = "^.*TODO:.*$";
-	char* searchPattern2 = "TODO:.*$";
-	Sci_TextToFind search;
-	search.lpstrText = searchPattern;
-	search.chrg.cpMin = 0;
-	search.chrg.cpMax = length;
-	int len;
-	int totalLen = 0;
-	Sci_TextRange result;
-	TodoItem item;
-	item.hScintilla = curScintilla;
-	while( ::SendMessage(curScintilla, SCI_FINDTEXT, SCFIND_REGEXP, (LPARAM)&search) > -1 )
-	{
-		//narrow down text to what we actually want
-		search.lpstrText = searchPattern2;
-		search.chrg.cpMin = search.chrgText.cpMin;
-		::SendMessage(curScintilla, SCI_FINDTEXT, SCFIND_REGEXP, (LPARAM)&search);
-		//get text and add it to list
-		len = search.chrgText.cpMax - search.chrgText.cpMin + 1; //+1 for \0
-		result.chrg = search.chrgText;
-		result.lpstrText = new char[len];
-		::SendMessage(curScintilla, SCI_GETTEXTRANGE, NULL, (LPARAM)&result);
-		//get meta-data to include with text: scintilla handle, text start/end
-		item.text = result.lpstrText;
-		item.startPosition = search.chrgText.cpMin;
-		item.endPosition = search.chrgText.cpMax;
-		todos.push_back(item);
 
-		//restore search pattern
-		search.lpstrText = searchPattern;
-		//advance search position
-		search.chrg.cpMin = search.chrgText.cpMax + 1;
+	int keyword_count;
+	const char * const *keywords= get_keyword_list(&keyword_count);
+	char search_pattern_1[k_max_keyword_length+16]; // + 16 for extra space for regex search strings and \0
+	char search_pattern_2[k_max_keyword_length+16]; // + 16 for extra space for regex search strings and \0
+
+	for (int keyword_index= 0; keyword_index<keyword_count; keyword_index++)
+	{
+		const char *keyword= keywords[keyword_index];
+		int keyword_length= strlen(keyword);
+
+		if (keyword_length<k_max_keyword_length) // this should be an assert
+		{
+			//sprintf(search_pattern_1, "^.*%s.*$", keyword);
+			sprintf(search_pattern_1, keyword);
+			//sprintf(search_pattern_2, "%s.*$", keyword);
+			sprintf(search_pattern_2, ".*$");
+
+			Sci_TextToFind search;
+			search.lpstrText = search_pattern_1;
+			search.chrg.cpMin = 0;
+			search.chrg.cpMax = length;
+			int len;
+			int totalLen = 0;
+			Sci_TextRange result;
+			TodoItem item;
+			item.hScintilla = curScintilla;
+			while( ::SendMessage(curScintilla, SCI_FINDTEXT, SCFIND_MATCHCASE | SCFIND_WHOLEWORD, (LPARAM)&search) > -1 )
+			{
+				//narrow down text to what we actually want
+				search.lpstrText = search_pattern_2;
+				search.chrg.cpMin = search.chrgText.cpMin;
+				::SendMessage(curScintilla, SCI_FINDTEXT, SCFIND_REGEXP, (LPARAM)&search);
+				//get text and add it to list
+				len = search.chrgText.cpMax - search.chrgText.cpMin + 1; //+1 for \0
+				result.chrg = search.chrgText;
+				result.lpstrText = new char[len];
+				::SendMessage(curScintilla, SCI_GETTEXTRANGE, NULL, (LPARAM)&result);
+				//get meta-data to include with text: scintilla handle, text start/end
+				item.text = result.lpstrText;
+				item.startPosition = search.chrgText.cpMin;
+				item.endPosition = search.chrgText.cpMax;
+				todos.push_back(item);
+
+				//restore search pattern
+				search.lpstrText = search_pattern_1;
+				//advance search position
+				search.chrg.cpMin = search.chrgText.cpMax + 1;
+			}
+		}
 	}
 
 	//display all todo's

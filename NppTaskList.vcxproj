@@ -85,8 +85,10 @@
     <ClInclude Include="include\StaticDialog.h" />
     <ClInclude Include="include\TaskListDlg.h" />
     <ClInclude Include="include\Window.h" />
+    <ClInclude Include="src\config.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\config.cpp" />
     <ClCompile Include="src\NppTaskListPlugin.cpp" />
     <ClCompile Include="src\PluginDefinition.cpp" />
     <ClCompile Include="src\StaticDialog.cpp" />
