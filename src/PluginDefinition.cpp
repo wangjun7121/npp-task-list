@@ -22,6 +22,7 @@
 #include "TaskListDlg.h"
 #include "config.h"
 
+
 //TODO: refactor/rename
 
 TaskListDlg _goToLine;
@@ -136,11 +137,24 @@ void displayDialog()
 //-- HELPER FUNCTIONS --//
 //----------------------------------------------//
 
+
+DWORD lastTaskFindCalledTime = 0;
+
 //find all tasks
 void findTasks()
 {
 	if (!_goToLine.isCreated())
 		return;
+
+
+	//do not scan document more frequently than once in half a second
+	DWORD curTime = GetTickCount();
+	if ((curTime - lastTaskFindCalledTime) < 500) {
+		return;
+	};
+	lastTaskFindCalledTime = curTime;
+
+
     // Open a new document
     //::SendMessage(nppData._nppHandle, NPPM_MENUCOMMAND, 0, IDM_FILE_NEW);
 
