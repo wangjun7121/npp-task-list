@@ -27,6 +27,8 @@
 
 TaskListDlg _goToLine;
 
+UINT OUTBOUND_TIMER_ID = 98712323;
+
 //
 // The plugin data that Notepad++ needs
 //
@@ -63,6 +65,7 @@ void pluginInit(HANDLE hModule)
 	// Initialize dockable demo dialog
 	_goToLine.init((HINSTANCE)hModule, NULL);
 	reload_config_file();
+	
 }
 
 //
@@ -70,7 +73,9 @@ void pluginInit(HANDLE hModule)
 //
 void pluginCleanUp()
 {
+	KillTimer(nppData._nppHandle, OUTBOUND_TIMER_ID);
 	unload_config_file();
+
 }
 
 //
@@ -91,6 +96,7 @@ void commandMenuInit()
     //            );
     setCommand(0, TEXT("Show Task List"), &displayDialog, NULL, false);
 	setCommand(1, TEXT("Reload Task List Configuration"), &reload_config_file, NULL, false);
+	displayDialog();
 }
 
 //
@@ -125,35 +131,35 @@ bool setCommand(size_t index, TCHAR *cmdName, PFUNCPLUGINCMD pFunc, ShortcutKey 
 //-- STEP 4. DEFINE YOUR ASSOCIATED FUNCTIONS --//
 //----------------------------------------------//
 
-void displayDialog()
-{
-	//open pane
-	DockableDlgDemo();
 
-	findTasks();
-}
-
-//----------------------------------------------//
-//-- HELPER FUNCTIONS --//
-//----------------------------------------------//
-
-
-DWORD lastTaskFindCalledTime = 0;
+bool needRescanTodos = false;
 
 //find all tasks
 void findTasks()
+{
+	needRescanTodos = true;
+
+}
+
+
+
+
+
+VOID CALLBACK MyTimerProc(
+	HWND hwnd,        // handle to window for timer messages 
+	UINT message,     // WM_TIMER message 
+	UINT idTimer,     // timer identifier 
+	DWORD dwTime)     // current system time 
 {
 	if (!_goToLine.isCreated())
 		return;
 
 
 	//do not scan document more frequently than once in half a second
-	DWORD curTime = GetTickCount();
-	if ((curTime - lastTaskFindCalledTime) < 500) {
+	if (!needRescanTodos) {
 		return;
-	};
-	lastTaskFindCalledTime = curTime;
-
+	}
+	needRescanTodos = false;
 
     // Open a new document
     //::SendMessage(nppData._nppHandle, NPPM_MENUCOMMAND, 0, IDM_FILE_NEW);
@@ -234,6 +240,30 @@ void findTasks()
 	}
 	todos.clear();
 }
+
+
+bool timerSettedUp = false;
+UINT uResult;
+
+
+void displayDialog()
+{
+	//open pane
+	DockableDlgDemo();
+
+	if (!timerSettedUp){
+
+		timerSettedUp = true;
+		uResult = SetTimer(nppData._nppHandle,      // handle to main window 
+			OUTBOUND_TIMER_ID,
+			200,
+			(TIMERPROC)MyTimerProc);
+	}
+
+	findTasks();
+}
+
+
 
 //Example Code Using CharToWideChar
 	//char buffer[256];
