@@ -27,7 +27,7 @@
 
 TaskListDlg _goToLine;
 
-UINT OUTBOUND_TIMER_ID = 98712323;
+UINT_PTR OUTBOUND_TIMER_ID = 98712323;
 
 //
 // The plugin data that Notepad++ needs
@@ -146,10 +146,10 @@ void findTasks()
 
 
 VOID CALLBACK MyTimerProc(
-	HWND hwnd,        // handle to window for timer messages 
-	UINT message,     // WM_TIMER message 
-	UINT idTimer,     // timer identifier 
-	DWORD dwTime)     // current system time 
+	HWND /*hwnd*/,        // handle to window for timer messages 
+	UINT /*message*/,     // WM_TIMER message 
+	UINT /*idTimer*/,     // timer identifier 
+	DWORD /*dwTime*/)     // current system time 
 {
 	if (!_goToLine.isCreated())
 		return;
@@ -200,7 +200,7 @@ VOID CALLBACK MyTimerProc(
 			search.chrg.cpMin = 0;
 			search.chrg.cpMax = length;
 			int len;
-			int totalLen = 0;
+			//int totalLen = 0;
 			Sci_TextRange result;
 			TodoItem item;
 			item.hScintilla = curScintilla;
@@ -243,7 +243,7 @@ VOID CALLBACK MyTimerProc(
 
 
 bool timerSettedUp = false;
-UINT uResult;
+UINT_PTR uResult;
 
 
 void displayDialog()
