@@ -175,7 +175,7 @@ VOID CALLBACK MyTimerProc(
 	std::list<TodoItem> todos;
 
 	//get length SCI_GETLENGTH
-    int length = ::SendMessage(curScintilla, SCI_GETLENGTH, 0, 0);
+	LRESULT length = ::SendMessage(curScintilla, SCI_GETLENGTH, 0, 0);
 	//search for todos: (starting at character 0) SCI_FINDTEXT
 
 	int keyword_count;
@@ -186,7 +186,7 @@ VOID CALLBACK MyTimerProc(
 	for (int keyword_index= 0; keyword_index<keyword_count; keyword_index++)
 	{
 		const char *keyword= keywords[keyword_index];
-		int keyword_length= strlen(keyword);
+		size_t keyword_length = strlen(keyword);
 
 		if (keyword_length<k_max_keyword_length) // this should be an assert
 		{
@@ -198,7 +198,7 @@ VOID CALLBACK MyTimerProc(
 			Sci_TextToFind search;
 			search.lpstrText = search_pattern_1;
 			search.chrg.cpMin = 0;
-			search.chrg.cpMax = length;
+			search.chrg.cpMax = static_cast<long>( length );
 			int len;
 			//int totalLen = 0;
 			Sci_TextRange result;
