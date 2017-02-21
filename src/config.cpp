@@ -124,7 +124,7 @@ e_config_load_result load_config_file()
 			newline_position= strchr(current_position, '\n');
 		}
 
-		if (success && current_position-default_config < strlen(default_config))
+		if (success && static_cast<size_t>(current_position-default_config) < strlen(default_config))
 		{
 			success&= handle_string(current_position);
 		}
@@ -177,7 +177,7 @@ static bool handle_string(
 	}
 	else
 	{
-		int string_length= strlen(string);
+		size_t string_length= strlen(string);
 		if (string_length==0) // double newline, reset state to invalid so we can look for a new config value
 		{
 			g_current_config_value= _config_value_invalid;

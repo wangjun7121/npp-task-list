@@ -20,7 +20,7 @@
 
 extern NppData nppData;
 
-BOOL CALLBACK TaskListDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK TaskListDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message) 
 	{
@@ -42,13 +42,13 @@ BOOL CALLBACK TaskListDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM lPara
 							HWND curScintilla = (which == 0)?nppData._scintillaMainHandle:nppData._scintillaSecondHandle;
 
 							//get selected item
-							unsigned int index;
+							LRESULT index;
 							if ( LB_ERR != (index = ::SendMessage((HWND)lParam, LB_GETCURSEL, NULL, NULL)) )
 							{
 								TodoItem item = todoItems[index];
 						
 								//make sure the line is visible
-								int line = ::SendMessage(curScintilla, SCI_LINEFROMPOSITION, item.startPosition, 0);
+								LRESULT line = ::SendMessage(curScintilla, SCI_LINEFROMPOSITION, item.startPosition, 0);
 								::SendMessage(curScintilla, SCI_ENSUREVISIBLE, line, 0);
 								//highlight selected item in text SCI_SETSEL
 								::SendMessage(curScintilla, SCI_SETSEL, item.endPosition, item.startPosition);
