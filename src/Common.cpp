@@ -7,10 +7,10 @@
 // version 2 of the License, or (at your option) any later version.
 //
 // Note that the GPL places important restrictions on "derived works", yet
-// it does not provide a detailed definition of that term.  To avoid      
-// misunderstandings, we consider an application to constitute a          
+// it does not provide a detailed definition of that term.  To avoid
+// misunderstandings, we consider an application to constitute a
 // "derivative work" for the purpose of this license if it does any of the
-// following:                                                             
+// following:
 // 1. Integrates source code from Notepad++.
 // 2. Integrates/includes/aggregates Notepad++ into a proprietary executable
 //    installer, such as those produced by InstallShield.
@@ -25,44 +25,47 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-#ifndef URLCTRL_INCLUDED
-#define URLCTRL_INCLUDED
+// NOTE : Extremely cleaned out, if you need more go to: https://github.com/notepad-plus-plus/notepad-plus-plus/blob/master/PowerEditor/src/MISC/Common/Common.cpp
 
-#include "Window.h"
 #include "Common.h"
 
-class URLCtrl : public Window {
-public:
-	URLCtrl() :_hfUnderlined(0), _hCursor(0), _msgDest(NULL), _cmdID(0), _oldproc(NULL), \
-		       _linkColor(), _visitedColor(), _clicking(false), _URL(TEXT("")){};
+COLORREF getCtrlBgColor(HWND hWnd)
+{
+	COLORREF crRet = CLR_INVALID;
 
-	void create(HWND itemHandle, TCHAR * link, COLORREF linkColor = RGB(0, 0, 255));
+	if (hWnd && IsWindow(hWnd)) {
+		RECT rc;
 
-	void create(HWND itemHandle, int cmd, HWND msgDest = NULL);
+		if (GetClientRect(hWnd, &rc)) {
+			HDC hDC = GetDC(hWnd);
 
-	void destroy();
+			if (hDC) {
+				HDC hdcMem = CreateCompatibleDC(hDC);
 
-private:
-	void action();
+				if (hdcMem) {
+					HBITMAP hBmp = CreateCompatibleBitmap(hDC, rc.right, rc.bottom);
 
-protected:
-	generic_string _URL;
-	HFONT	_hfUnderlined;
-	HCURSOR	_hCursor;
+					if (hBmp) {
+						HGDIOBJ hOld = SelectObject(hdcMem, hBmp);
 
-	HWND _msgDest;
-	unsigned long _cmdID;
+						if (hOld) {
+							if (SendMessage(hWnd, WM_ERASEBKGND, reinterpret_cast<WPARAM>(hdcMem), 0)) {
+								crRet = GetPixel(hdcMem, 2, 2); // 0, 0 is usually on the border
+							}
 
-	WNDPROC  _oldproc;
-	COLORREF _linkColor;
-	COLORREF _visitedColor;
-	bool  _clicking;
+							SelectObject(hdcMem, hOld);
+						}
 
-	static LRESULT CALLBACK URLCtrlProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam){
-		return ((URLCtrl *)(::GetWindowLongPtr(hwnd, GWLP_USERDATA)))->runProc(hwnd, Message, wParam, lParam);
-	};
+						DeleteObject(hBmp);
+					}
 
-	LRESULT runProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
-};
+					DeleteDC(hdcMem);
+				}
 
-#endif //URLCTRL_INCLUDED
+				ReleaseDC(hWnd, hDC);
+			}
+		}
+	}
+
+	return crRet;
+}

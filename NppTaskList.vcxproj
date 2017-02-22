@@ -168,6 +168,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\Common.h" />
     <ClInclude Include="include\Docking.h" />
     <ClInclude Include="include\DockingDlgInterface.h" />
     <ClInclude Include="include\dockingResource.h" />
@@ -186,6 +187,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AboutDialog\AboutDlg.cpp" />
+    <ClCompile Include="src\Common.cpp" />
     <ClCompile Include="src\config.cpp" />
     <ClCompile Include="src\NppTaskListPlugin.cpp" />
     <ClCompile Include="src\PluginDefinition.cpp" />
