@@ -19,7 +19,7 @@
 #define GOTILINE_DLG_H
 
 #include "DockingDlgInterface.h"
-#include "resource.h"
+#include "../resources/resource.h"
 
 typedef struct
 {
@@ -34,7 +34,7 @@ typedef struct
 class TaskListDlg : public DockingDlgInterface
 {
 public :
-	TaskListDlg() : DockingDlgInterface(IDD_PLUGINGOLINE_DEMO){};
+	TaskListDlg() : DockingDlgInterface(IDD_TODOLIST_DIALOG){};
 
     virtual void display(bool toShow = true) const {
         DockingDlgInterface::display(toShow);

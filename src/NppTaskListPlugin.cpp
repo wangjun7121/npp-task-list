@@ -21,7 +21,7 @@ extern FuncItem funcItem[nbFunc];
 extern NppData nppData;
 
 
-BOOL APIENTRY DllMain( HANDLE hModule, 
+BOOL APIENTRY DllMain( HINSTANCE hModule,
                        DWORD  reasonForCall, 
                        LPVOID /*lpReserved*/ )
 {
@@ -50,7 +50,7 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 extern "C" __declspec(dllexport) void setInfo(NppData notpadPlusData)
 {
 	nppData = notpadPlusData;
-	commandMenuInit();
+	commandMenuInit(notpadPlusData);
 }
 
 extern "C" __declspec(dllexport) const TCHAR * getName()
