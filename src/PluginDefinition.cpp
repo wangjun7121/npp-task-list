@@ -17,6 +17,7 @@
 
 #include "PluginDefinition.h"
 #include "menuCmdID.h"
+#include "assert.h"
 
 #include <list>
 #include "TaskListDlg.h"
@@ -175,7 +176,7 @@ VOID CALLBACK MyTimerProc(
 	std::list<TodoItem> todos;
 
 	//get length SCI_GETLENGTH
-    int length = ::SendMessage(curScintilla, SCI_GETLENGTH, 0, 0);
+	LRESULT length = ::SendMessage(curScintilla, SCI_GETLENGTH, 0, 0);
 	//search for todos: (starting at character 0) SCI_FINDTEXT
 
 	int keyword_count;
@@ -186,46 +187,45 @@ VOID CALLBACK MyTimerProc(
 	for (int keyword_index= 0; keyword_index<keyword_count; keyword_index++)
 	{
 		const char *keyword= keywords[keyword_index];
-		int keyword_length= strlen(keyword);
 
-		if (keyword_length<k_max_keyword_length) // this should be an assert
+		assert(strlen(keyword) < k_max_keyword_length);
+
+		//sprintf(search_pattern_1, "^.*%s.*$", keyword);
+		sprintf(search_pattern_1, keyword);
+		//sprintf(search_pattern_2, "%s.*$", keyword);
+		sprintf(search_pattern_2, ".*$");
+
+		Sci_TextToFind search;
+		search.lpstrText = search_pattern_1;
+		search.chrg.cpMin = 0;
+		search.chrg.cpMax = static_cast<long>( length );
+		int len;
+		//int totalLen = 0;
+		Sci_TextRange result;
+		TodoItem item;
+		item.hScintilla = curScintilla;
+
+		while( ::SendMessage(curScintilla, SCI_FINDTEXT, SCFIND_MATCHCASE | SCFIND_WHOLEWORD, (LPARAM)&search) > -1 )
 		{
-			//sprintf(search_pattern_1, "^.*%s.*$", keyword);
-			sprintf(search_pattern_1, keyword);
-			//sprintf(search_pattern_2, "%s.*$", keyword);
-			sprintf(search_pattern_2, ".*$");
+			//narrow down text to what we actually want
+			search.lpstrText = search_pattern_2;
+			search.chrg.cpMin = search.chrgText.cpMin;
+			::SendMessage(curScintilla, SCI_FINDTEXT, SCFIND_REGEXP, (LPARAM)&search);
+			//get text and add it to list
+			len = search.chrgText.cpMax - search.chrgText.cpMin + 1; //+1 for \0
+			result.chrg = search.chrgText;
+			result.lpstrText = new char[len];
+			::SendMessage(curScintilla, SCI_GETTEXTRANGE, NULL, (LPARAM)&result);
+			//get meta-data to include with text: scintilla handle, text start/end
+			item.text = result.lpstrText;
+			item.startPosition = search.chrgText.cpMin;
+			item.endPosition = search.chrgText.cpMax;
+			todos.push_back(item);
 
-			Sci_TextToFind search;
+			//restore search pattern
 			search.lpstrText = search_pattern_1;
-			search.chrg.cpMin = 0;
-			search.chrg.cpMax = length;
-			int len;
-			//int totalLen = 0;
-			Sci_TextRange result;
-			TodoItem item;
-			item.hScintilla = curScintilla;
-			while( ::SendMessage(curScintilla, SCI_FINDTEXT, SCFIND_MATCHCASE | SCFIND_WHOLEWORD, (LPARAM)&search) > -1 )
-			{
-				//narrow down text to what we actually want
-				search.lpstrText = search_pattern_2;
-				search.chrg.cpMin = search.chrgText.cpMin;
-				::SendMessage(curScintilla, SCI_FINDTEXT, SCFIND_REGEXP, (LPARAM)&search);
-				//get text and add it to list
-				len = search.chrgText.cpMax - search.chrgText.cpMin + 1; //+1 for \0
-				result.chrg = search.chrgText;
-				result.lpstrText = new char[len];
-				::SendMessage(curScintilla, SCI_GETTEXTRANGE, NULL, (LPARAM)&result);
-				//get meta-data to include with text: scintilla handle, text start/end
-				item.text = result.lpstrText;
-				item.startPosition = search.chrgText.cpMin;
-				item.endPosition = search.chrgText.cpMax;
-				todos.push_back(item);
-
-				//restore search pattern
-				search.lpstrText = search_pattern_1;
-				//advance search position
-				search.chrg.cpMin = search.chrgText.cpMax + 1;
-			}
+			//advance search position
+			search.chrg.cpMin = search.chrgText.cpMax + 1;
 		}
 	}
 
