@@ -21,12 +21,16 @@
 
 #include <list>
 #include "TaskListDlg.h"
+#include "AboutDialog\AboutDlg.h"
 #include "config.h"
 
+// global values
+HINSTANCE	g_hInstance = NULL;
+NppData		g_NppData;
 
 //TODO: refactor/rename
-
 TaskListDlg _goToLine;
+AboutDialog _aboutDlg;
 
 UINT_PTR OUTBOUND_TIMER_ID = 98712323;
 
@@ -61,10 +65,12 @@ void reload_config_file()
 //
 // Initialize your plugin data here
 // It will be called while plugin loading   
-void pluginInit(HANDLE hModule)
+void pluginInit(HINSTANCE hModule)
 {
+	g_hInstance = hModule;
+
 	// Initialize dockable demo dialog
-	_goToLine.init((HINSTANCE)hModule, NULL);
+	_goToLine.init(hModule, NULL);
 	reload_config_file();
 	
 }
@@ -82,8 +88,11 @@ void pluginCleanUp()
 //
 // Initialization of your plugin commands
 // You should fill your plugins commands here
-void commandMenuInit()
+void commandMenuInit(NppData nppData)
 {
+	g_NppData = nppData;
+
+	_aboutDlg.init(g_hInstance, g_NppData);
 
     //--------------------------------------------//
     //-- STEP 3. CUSTOMIZE YOUR PLUGIN COMMANDS --//
@@ -95,8 +104,9 @@ void commandMenuInit()
     //            ShortcutKey *shortcut,          // optional. Define a shortcut to trigger this command
     //            bool check0nInit                // optional. Make this menu item be checked visually
     //            );
-    setCommand(0, TEXT("Show Task List"), &displayDialog, NULL, false);
+	setCommand(0, TEXT("Show Task List"), &displayDialog, NULL, false);
 	setCommand(1, TEXT("Reload Task List Configuration"), &reload_config_file, NULL, false);
+	setCommand(2, TEXT("About Task List"), &displayAboutDialog, NULL, false);
 	displayDialog();
 }
 
@@ -249,7 +259,7 @@ UINT_PTR uResult;
 void displayDialog()
 {
 	//open pane
-	DockableDlgDemo();
+	OpenTaskListDockableDlg();
 
 	if (!timerSettedUp){
 
@@ -263,6 +273,11 @@ void displayDialog()
 	findTasks();
 }
 
+
+void displayAboutDialog()
+{
+	_aboutDlg.doDialog();
+}
 
 
 //Example Code Using CharToWideChar
@@ -303,7 +318,7 @@ bool CharToWideChar( const char* _inString, BSTR* _out )
 // You can create your own non dockable dialog - in this case you don't nedd this demonstration.
 // You have to create your dialog by inherented DockingDlgInterface class in order to make your dialog dockable
 // - please see DemoDlg.h and DemoDlg.cpp to have more informations.
-void DockableDlgDemo()
+void OpenTaskListDockableDlg()
 {
 	_goToLine.setParent(nppData._nppHandle);
 	tTbData	data = {0};

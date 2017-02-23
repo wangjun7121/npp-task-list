@@ -174,6 +174,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\Common.h" />
     <ClInclude Include="include\Docking.h" />
     <ClInclude Include="include\DockingDlgInterface.h" />
     <ClInclude Include="include\dockingResource.h" />
@@ -181,19 +182,24 @@
     <ClInclude Include="include\Notepad_plus_msgs.h" />
     <ClInclude Include="include\PluginDefinition.h" />
     <ClInclude Include="include\PluginInterface.h" />
-    <ClInclude Include="include\resource.h" />
     <ClInclude Include="include\Scintilla.h" />
     <ClInclude Include="include\StaticDialog.h" />
     <ClInclude Include="include\TaskListDlg.h" />
+    <ClInclude Include="include\URLCtrl.h" />
     <ClInclude Include="include\Window.h" />
+    <ClInclude Include="resources\resource.h" />
+    <ClInclude Include="src\AboutDialog\AboutDlg.h" />
     <ClInclude Include="src\config.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\AboutDialog\AboutDlg.cpp" />
+    <ClCompile Include="src\Common.cpp" />
     <ClCompile Include="src\config.cpp" />
     <ClCompile Include="src\NppTaskListPlugin.cpp" />
     <ClCompile Include="src\PluginDefinition.cpp" />
     <ClCompile Include="src\StaticDialog.cpp" />
     <ClCompile Include="src\TaskListDlg.cpp" />
+    <ClCompile Include="src\URLCtrl.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resources\TaskList.rc" />
@@ -201,4 +207,9 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="resources\TaskList.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>
