@@ -88,9 +88,9 @@ void pluginCleanUp()
 //
 // Initialization of your plugin commands
 // You should fill your plugins commands here
-void commandMenuInit(NppData nppData)
+void commandMenuInit(NppData aNppData)
 {
-	g_NppData = nppData;
+	g_NppData = aNppData;
 
 	_aboutDlg.init(g_hInstance, g_NppData);
 
