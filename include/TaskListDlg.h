@@ -68,6 +68,8 @@ protected :
 
 private :
 	std::vector<TodoItem> todoItems;
+	HBRUSH hbrBackgnd = NULL;
+	HWND GetCurScintilla();
 };
 
 #endif //GOTILINE_DLG_H
