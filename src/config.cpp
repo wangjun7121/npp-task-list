@@ -16,7 +16,7 @@ char default_config_v1[]= "version=\n1\n\nkeywords=\nTODO:";
 #define default_config default_config_v1
 const int k_current_version= 1;
 
-const char *k_config_file_path="./plugins/config/npp_task_list.cfg";
+const char *k_config_file_path="./plugins/NppTaskList/config/npp_task_list.cfg";
 
 // globals
 
