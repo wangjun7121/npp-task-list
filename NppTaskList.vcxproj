@@ -183,6 +183,7 @@
     <ClInclude Include="include\PluginDefinition.h" />
     <ClInclude Include="include\PluginInterface.h" />
     <ClInclude Include="include\Scintilla.h" />
+    <ClInclude Include="include\Sci_Position.h" />
     <ClInclude Include="include\StaticDialog.h" />
     <ClInclude Include="include\TaskListDlg.h" />
     <ClInclude Include="include\URLCtrl.h" />

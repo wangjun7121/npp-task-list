@@ -280,38 +280,6 @@ void displayAboutDialog()
 }
 
 
-//Example Code Using CharToWideChar
-	//char buffer[256];
-	//BSTR unicodestr;
-	//itoa(length, buffer, 10);
-	//if ( CharToWideChar(buffer, &unicodestr) )
-	//{
-	//	::MessageBox(NULL, unicodestr, TEXT("Notepad++ Plugin Template"), MB_OK);
-	//	// when done, free the BSTR
-	//	::SysFreeString(unicodestr);
-	//}
-bool CharToWideChar( const char* _inString, BSTR* _out )
-{
-	if ( !_inString )
-	{
-		return 0;
-	}
-	int len = lstrlenA(_inString);
-	int lenW = ::MultiByteToWideChar(CP_ACP, 0, _inString, len, 0, 0);
-	if (lenW > 0)
-	{
-		// Check whether conversion was successful
-		*_out = ::SysAllocStringLen(0, lenW);
-		::MultiByteToWideChar(CP_ACP, 0, _inString, len, *_out, lenW);
-	}
-	else
-	{
-		// handle the error
-		return false;
-	}
-	return true;
-}
-
 // Dockable Dialog Demo
 // 
 // This demonstration shows you how to do a dockable dialog.

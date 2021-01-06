@@ -1,5 +1,5 @@
 // This file is part of Notepad++ project
-// Copyright (C)2003 Don HO <don.h@free.fr>
+// Copyright (C)2020 Don HO <don.h@free.fr>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -27,8 +27,7 @@
 
 // NOTE : Extremely cleaned out, if you need more go to: https://github.com/notepad-plus-plus/notepad-plus-plus/blob/master/PowerEditor/src/MISC/Common/Common.h
 
-#ifndef COMMON_INCLUDED
-#define COMMON_INCLUDED
+#pragma once
 
 #include <string>
 #include <windows.h>
@@ -37,4 +36,5 @@ typedef std::basic_string<TCHAR> generic_string;
 
 COLORREF getCtrlBgColor(HWND hWnd);
 
-#endif // COMMON_INCLUDED
+generic_string GetLastErrorAsString(DWORD errorCode = 0);
+
