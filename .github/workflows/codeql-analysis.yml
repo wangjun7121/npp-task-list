@@ -55,7 +55,7 @@ jobs:
 
     - name: MSBuild of plugin dll
       working-directory: .
-      run: msbuild NppTaskList.vcxproj /m /p:configuration="${{ matrix.build_configuration }}" /p:platform="${{ matrix.build_platform }}" /p:PlatformToolset="v142"
+      run: msbuild NppTaskList.vcxproj /m /p:configuration="Debug" /p:platform="x64" /p:PlatformToolset="v142"
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
