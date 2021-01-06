@@ -243,10 +243,9 @@ VOID CALLBACK MyTimerProc(
 	_goToLine.SetList(todos);
 	
 	//cleanup list
-	std::list<TodoItem>::iterator it;
-	for ( it = todos.begin(); it != todos.end(); ++it )
+	for (const auto &it : todos)
 	{
-		delete[] it->text;
+		delete[] it.text;
 	}
 	todos.clear();
 }
