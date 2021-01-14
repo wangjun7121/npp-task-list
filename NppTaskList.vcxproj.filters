@@ -63,6 +63,9 @@
     <ClInclude Include="include\Common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Sci_Position.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\NppTaskListPlugin.cpp">
