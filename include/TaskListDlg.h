@@ -19,7 +19,8 @@
 #define GOTILINE_DLG_H
 
 #include "DockingDlgInterface.h"
-#include "resource.h"
+#include "../resources/resource.h"
+#include <codecvt>
 
 typedef struct
 {
@@ -34,7 +35,7 @@ typedef struct
 class TaskListDlg : public DockingDlgInterface
 {
 public :
-	TaskListDlg() : DockingDlgInterface(IDD_PLUGINGOLINE_DEMO){};
+	TaskListDlg() : DockingDlgInterface(IDD_TODOLIST_DIALOG){};
 
     virtual void display(bool toShow = true) const {
         DockingDlgInterface::display(toShow);
@@ -51,23 +52,28 @@ public :
 		HWND _hList = ::GetDlgItem( _hSelf, ID_TODO_LIST );
 		if ( !_hList )
 			return;
-        //clear list LB_RESETCONTENT
-		::SendMessageA( _hList, LB_RESETCONTENT, NULL, NULL );
+		//clear list LB_RESETCONTENT
+		::SendMessage( _hList, LB_RESETCONTENT, NULL, NULL );
 		todoItems.clear();
+
+		//prepare for ut8 conversion
+		using convert_typeX = std::codecvt_utf8<wchar_t>;
+		std::wstring_convert<convert_typeX, wchar_t> converterX;
 		//add list items LB_ADDSTRING
-		std::list<TodoItem>::const_iterator it;
-		for ( it = items.begin(); it != items.end(); ++it )
+		for (const auto &it : items)
 		{
-			::SendMessageA( _hList, LB_ADDSTRING, NULL, (LPARAM)it->text );
-			todoItems.push_back(*it);
+			::SendMessage( _hList, LB_ADDSTRING, NULL, (LPARAM)converterX.from_bytes(it.text).c_str());
+			todoItems.push_back(it);
 		}
-    };
+	};
 
 protected :
-	virtual BOOL CALLBACK run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam);
+	virtual INT_PTR CALLBACK run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam);
 
 private :
 	std::vector<TodoItem> todoItems;
+	HBRUSH hbrBackgnd = NULL;
+	HWND GetCurScintilla();
 };
 
 #endif //GOTILINE_DLG_H

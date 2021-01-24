@@ -1,0 +1,10 @@
+*.exp
+*.lib
+*.opensdf
+*.sdf
+*.suo
+Debug
+Release
+bin
+.vs
+*.vcxproj.user

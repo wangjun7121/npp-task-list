@@ -17,14 +17,22 @@
 
 #include "PluginDefinition.h"
 #include "menuCmdID.h"
+#include "assert.h"
 
 #include <list>
 #include "TaskListDlg.h"
+#include "AboutDialog\AboutDlg.h"
 #include "config.h"
 
-//TODO: refactor/rename
+// global values
+HINSTANCE	g_hInstance = NULL;
+NppData		g_NppData;
 
+//TODO: refactor/rename
 TaskListDlg _goToLine;
+AboutDialog _aboutDlg;
+
+UINT_PTR OUTBOUND_TIMER_ID = 98712323;
 
 //
 // The plugin data that Notepad++ needs
@@ -57,11 +65,14 @@ void reload_config_file()
 //
 // Initialize your plugin data here
 // It will be called while plugin loading   
-void pluginInit(HANDLE hModule)
+void pluginInit(HINSTANCE hModule)
 {
+	g_hInstance = hModule;
+
 	// Initialize dockable demo dialog
-	_goToLine.init((HINSTANCE)hModule, NULL);
+	_goToLine.init(hModule, NULL);
 	reload_config_file();
+	
 }
 
 //
@@ -69,14 +80,19 @@ void pluginInit(HANDLE hModule)
 //
 void pluginCleanUp()
 {
+	KillTimer(nppData._nppHandle, OUTBOUND_TIMER_ID);
 	unload_config_file();
+
 }
 
 //
 // Initialization of your plugin commands
 // You should fill your plugins commands here
-void commandMenuInit()
+void commandMenuInit(NppData aNppData)
 {
+	g_NppData = aNppData;
+
+	_aboutDlg.init(g_hInstance, g_NppData);
 
     //--------------------------------------------//
     //-- STEP 3. CUSTOMIZE YOUR PLUGIN COMMANDS --//
@@ -88,8 +104,10 @@ void commandMenuInit()
     //            ShortcutKey *shortcut,          // optional. Define a shortcut to trigger this command
     //            bool check0nInit                // optional. Make this menu item be checked visually
     //            );
-    setCommand(0, TEXT("Show Task List"), &displayDialog, NULL, false);
+	setCommand(0, TEXT("Show Task List"), &displayDialog, NULL, false);
 	setCommand(1, TEXT("Reload Task List Configuration"), &reload_config_file, NULL, false);
+	setCommand(2, TEXT("About Task List"), &displayAboutDialog, NULL, false);
+	displayDialog();
 }
 
 //
@@ -124,23 +142,36 @@ bool setCommand(size_t index, TCHAR *cmdName, PFUNCPLUGINCMD pFunc, ShortcutKey 
 //-- STEP 4. DEFINE YOUR ASSOCIATED FUNCTIONS --//
 //----------------------------------------------//
 
-void displayDialog()
-{
-	//open pane
-	DockableDlgDemo();
 
-	findTasks();
-}
-
-//----------------------------------------------//
-//-- HELPER FUNCTIONS --//
-//----------------------------------------------//
+bool needRescanTodos = false;
 
 //find all tasks
 void findTasks()
 {
+	needRescanTodos = true;
+
+}
+
+
+
+
+
+VOID CALLBACK MyTimerProc(
+	HWND /*hwnd*/,        // handle to window for timer messages 
+	UINT /*message*/,     // WM_TIMER message 
+	UINT /*idTimer*/,     // timer identifier 
+	DWORD /*dwTime*/)     // current system time 
+{
 	if (!_goToLine.isCreated())
 		return;
+
+
+	//do not scan document more frequently than once in half a second
+	if (!needRescanTodos) {
+		return;
+	}
+	needRescanTodos = false;
+
     // Open a new document
     //::SendMessage(nppData._nppHandle, NPPM_MENUCOMMAND, 0, IDM_FILE_NEW);
 
@@ -155,7 +186,7 @@ void findTasks()
 	std::list<TodoItem> todos;
 
 	//get length SCI_GETLENGTH
-    int length = ::SendMessage(curScintilla, SCI_GETLENGTH, 0, 0);
+	LRESULT length = ::SendMessage(curScintilla, SCI_GETLENGTH, 0, 0);
 	//search for todos: (starting at character 0) SCI_FINDTEXT
 
 	int keyword_count;
@@ -166,46 +197,45 @@ void findTasks()
 	for (int keyword_index= 0; keyword_index<keyword_count; keyword_index++)
 	{
 		const char *keyword= keywords[keyword_index];
-		int keyword_length= strlen(keyword);
 
-		if (keyword_length<k_max_keyword_length) // this should be an assert
+		assert(strlen(keyword) < k_max_keyword_length);
+
+		//sprintf(search_pattern_1, "^.*%s.*$", keyword);
+		sprintf(search_pattern_1, keyword);
+		//sprintf(search_pattern_2, "%s.*$", keyword);
+		sprintf(search_pattern_2, ".*$");
+
+		Sci_TextToFind search;
+		search.lpstrText = search_pattern_1;
+		search.chrg.cpMin = 0;
+		search.chrg.cpMax = static_cast<long>( length );
+		int len;
+		//int totalLen = 0;
+		Sci_TextRange result;
+		TodoItem item;
+		item.hScintilla = curScintilla;
+
+		while( ::SendMessage(curScintilla, SCI_FINDTEXT, SCFIND_MATCHCASE | SCFIND_WHOLEWORD, (LPARAM)&search) > -1 )
 		{
-			//sprintf(search_pattern_1, "^.*%s.*$", keyword);
-			sprintf(search_pattern_1, keyword);
-			//sprintf(search_pattern_2, "%s.*$", keyword);
-			sprintf(search_pattern_2, ".*$");
+			//narrow down text to what we actually want
+			search.lpstrText = search_pattern_2;
+			search.chrg.cpMin = search.chrgText.cpMin;
+			::SendMessage(curScintilla, SCI_FINDTEXT, SCFIND_REGEXP, (LPARAM)&search);
+			//get text and add it to list
+			len = search.chrgText.cpMax - search.chrgText.cpMin + 1; //+1 for \0
+			result.chrg = search.chrgText;
+			result.lpstrText = new char[len];
+			::SendMessage(curScintilla, SCI_GETTEXTRANGE, NULL, (LPARAM)&result);
+			//get meta-data to include with text: scintilla handle, text start/end
+			item.text = result.lpstrText;
+			item.startPosition = search.chrgText.cpMin;
+			item.endPosition = search.chrgText.cpMax;
+			todos.push_back(item);
 
-			Sci_TextToFind search;
+			//restore search pattern
 			search.lpstrText = search_pattern_1;
-			search.chrg.cpMin = 0;
-			search.chrg.cpMax = length;
-			int len;
-			int totalLen = 0;
-			Sci_TextRange result;
-			TodoItem item;
-			item.hScintilla = curScintilla;
-			while( ::SendMessage(curScintilla, SCI_FINDTEXT, SCFIND_MATCHCASE | SCFIND_WHOLEWORD, (LPARAM)&search) > -1 )
-			{
-				//narrow down text to what we actually want
-				search.lpstrText = search_pattern_2;
-				search.chrg.cpMin = search.chrgText.cpMin;
-				::SendMessage(curScintilla, SCI_FINDTEXT, SCFIND_REGEXP, (LPARAM)&search);
-				//get text and add it to list
-				len = search.chrgText.cpMax - search.chrgText.cpMin + 1; //+1 for \0
-				result.chrg = search.chrgText;
-				result.lpstrText = new char[len];
-				::SendMessage(curScintilla, SCI_GETTEXTRANGE, NULL, (LPARAM)&result);
-				//get meta-data to include with text: scintilla handle, text start/end
-				item.text = result.lpstrText;
-				item.startPosition = search.chrgText.cpMin;
-				item.endPosition = search.chrgText.cpMax;
-				todos.push_back(item);
-
-				//restore search pattern
-				search.lpstrText = search_pattern_1;
-				//advance search position
-				search.chrg.cpMin = search.chrgText.cpMax + 1;
-			}
+			//advance search position
+			search.chrg.cpMin = search.chrgText.cpMax + 1;
 		}
 	}
 
@@ -213,45 +243,41 @@ void findTasks()
 	_goToLine.SetList(todos);
 	
 	//cleanup list
-	std::list<TodoItem>::iterator it;
-	for ( it = todos.begin(); it != todos.end(); ++it )
+	for (const auto &it : todos)
 	{
-		delete[] it->text;
+		delete[] it.text;
 	}
 	todos.clear();
 }
 
-//Example Code Using CharToWideChar
-	//char buffer[256];
-	//BSTR unicodestr;
-	//itoa(length, buffer, 10);
-	//if ( CharToWideChar(buffer, &unicodestr) )
-	//{
-	//	::MessageBox(NULL, unicodestr, TEXT("Notepad++ Plugin Template"), MB_OK);
-	//	// when done, free the BSTR
-	//	::SysFreeString(unicodestr);
-	//}
-bool CharToWideChar( const char* _inString, BSTR* _out )
+
+bool timerSettedUp = false;
+UINT_PTR uResult;
+
+
+void displayDialog()
 {
-	if ( !_inString )
-	{
-		return 0;
+	//open pane
+	OpenTaskListDockableDlg();
+
+	if (!timerSettedUp){
+
+		timerSettedUp = true;
+		uResult = SetTimer(nppData._nppHandle,      // handle to main window 
+			OUTBOUND_TIMER_ID,
+			200,
+			(TIMERPROC)MyTimerProc);
 	}
-	int len = lstrlenA(_inString);
-	int lenW = ::MultiByteToWideChar(CP_ACP, 0, _inString, len, 0, 0);
-	if (lenW > 0)
-	{
-		// Check whether conversion was successful
-		*_out = ::SysAllocStringLen(0, lenW);
-		::MultiByteToWideChar(CP_ACP, 0, _inString, len, *_out, lenW);
-	}
-	else
-	{
-		// handle the error
-		return false;
-	}
-	return true;
+
+	findTasks();
 }
+
+
+void displayAboutDialog()
+{
+	_aboutDlg.doDialog();
+}
+
 
 // Dockable Dialog Demo
 // 
@@ -259,7 +285,7 @@ bool CharToWideChar( const char* _inString, BSTR* _out )
 // You can create your own non dockable dialog - in this case you don't nedd this demonstration.
 // You have to create your dialog by inherented DockingDlgInterface class in order to make your dialog dockable
 // - please see DemoDlg.h and DemoDlg.cpp to have more informations.
-void DockableDlgDemo()
+void OpenTaskListDockableDlg()
 {
 	_goToLine.setParent(nppData._nppHandle);
 	tTbData	data = {0};
