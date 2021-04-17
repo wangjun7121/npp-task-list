@@ -28,7 +28,7 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_BORDER | WS_SYSMENU
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "&Ok",1,110,120,50,14
-    CTEXT           "Task List v2.2.0",IDC_ABOUT_TITLE,7,7,257,17,SS_CENTERIMAGE,WS_EX_DLGMODALFRAME | WS_EX_TRANSPARENT
+    CTEXT           "Task List v2.3.0",IDC_ABOUT_TITLE,7,7,257,17,SS_CENTERIMAGE,WS_EX_DLGMODALFRAME | WS_EX_TRANSPARENT
     LTEXT           "Url:",IDC_ABOUT_URL_PREFIX,12,34,27,9
     LTEXT           "https://github.com/Megabyteceer/npp-task-list",IDC_ABOUT_URL,39,34,220,9
     LTEXT           "Contributors:",IDC_ABOUT_CONTRIBUTORS,12,50,247,9
@@ -70,8 +70,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,2,0,0
- PRODUCTVERSION 2,2,0,0
+ FILEVERSION 2,3,0,0
+ PRODUCTVERSION 2,3,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -87,12 +87,12 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "FileDescription", "Task List for Notepad++"
-            VALUE "FileVersion", "2.2.0.0"
+            VALUE "FileVersion", "2.3.0.0"
             VALUE "InternalName", "NppTaskList.dll"
             VALUE "LegalCopyright", "Copyright 2021"
             VALUE "OriginalFilename", "NppTaskList.dll"
             VALUE "ProductName", "Task List for Notepad++"
-            VALUE "ProductVersion", "2.2.0.0"
+            VALUE "ProductVersion", "2.3.0.0"
         END
     END
     BLOCK "VarFileInfo"
