@@ -1,0 +1,32 @@
+Change summary for attempts to fix the overwrite problem
+
+1 - recompiled existing code in x64.  My DLL appears to match the existing 2.4 release DLL.
+2 - replaced the following include files:
+	Docking.h - REVERTED
+	DockingDlgInterface.h - REVERTED (NEEDED because new would required access to static DarkMode namespace items)
+	menuCmdID.h - UNNECESSARY?
+	Notpad_plus_msgs.h - HAS DM COMMUNICATION CODES!  NEEDED IF WE WANT DM NOTIFICATIONS
+	Sci_position.h - REVERTED
+	Scintilla.h - REVERTED (NEEDED because new would have buffer issues)
+	StaticDialog.h - REVERTED
+	URLCtrl.h - REVERTED
+3 - replaced the following source files:
+	StaticDialog.cpp - REVERTED
+	URLCtrl.cpp - REVERTED
+4 - added the following include files:
+	NppDarkMode.h - HAS DM Colors struct -> DO I NEED IT?
+5 - made changes to the following files:
+	TaskList.rc - to version 2.5 and added contributor - OK
+	resource.h - needed to add IDC for new contributor - OK
+
+
+I have questions about the StaticDialog::alignWith function missing from 8.4 NPP code
+	Doesn't appear to be called herein
+
+TaskListDlg - both .h and .cpp - appears to be unrelated to the current TaskListDlg functions of NPP.  In my ideal world these would be renamed as TodoListDlg
+AboutDlg - both .h and .cpp - appears also to be only peripherally related to AboutDlg functions of NPP.  No changes planned.
+Window.h - license descriptor only changes to file so I skipped.
+Common - both .h and .cpp - seems to be a completely truncated version of the NPP code keeping only 3 changed functions.
+
+Can't handle static elements of DarkMode namespace!
+Need to address issue with messages and notifications

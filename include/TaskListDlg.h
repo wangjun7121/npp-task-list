@@ -20,6 +20,7 @@
 
 #include "DockingDlgInterface.h"
 #include "../resources/resource.h"
+#include "PluginDefinition.h"
 #include <codecvt>
 
 typedef struct
@@ -54,7 +55,22 @@ public :
 			return;
 		//clear list LB_RESETCONTENT
 		::SendMessage( _hList, LB_RESETCONTENT, NULL, NULL );
+		if ( !isDarkMode() && !todoItems.empty() )
+		{
+		// 1 - addition of darkmode in NPP 8.4.3ff has produced an artifact (only) in regular 
+			// display mode.  when list box contents is cleared via LB_RESETCONTENT it does not 
+			// occur promptly.  moreover if the new contents are added too quickly they are written 
+			// over the old contents - although the old contents are not selectable.
+		// 2 - this code causes a 200 ms delay by clearing the current contents and using 
+			// findTasks() to force a second update at next time tick.
+		// 3 - I choose to add this delay code solely to fix the light mode problem since dark mode works fine - NeArnold
+			todoItems.clear();
+//			::RedrawWindow( _hList, 0, 0, RDW_ERASE | RDW_INVALIDATE );	// tried to force faster clearing
+			findTasks();
+			return;
+		}
 		todoItems.clear();
+//		::RedrawWindow( _hList, 0, 0, RDW_ERASENOW | RDW_INVALIDATE );	// tried to force faster clearing
 
 		//prepare for ut8 conversion
 		using convert_typeX = std::codecvt_utf8<wchar_t>;
@@ -74,6 +90,7 @@ private :
 	std::vector<TodoItem> todoItems;
 	HBRUSH hbrBackgnd = NULL;
 	HWND GetCurScintilla();
+	bool isDarkMode();
 };
 
 #endif //GOTILINE_DLG_H
