@@ -106,8 +106,3 @@ HWND TaskListDlg::GetCurScintilla()
 
 	return (which == 0) ? nppData._scintillaMainHandle : nppData._scintillaSecondHandle;
 }
-
-bool TaskListDlg::isDarkMode()
-{
-	return ::SendMessage(nppData._nppHandle, NPPM_ISDARKMODEENABLED, 0, 0);
-}
