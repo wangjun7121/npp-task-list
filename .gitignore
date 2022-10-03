@@ -9,3 +9,5 @@ bin
 .vs
 *.vcxproj.user
 *.vcxproj.filters
+*.sln
+*.aps
