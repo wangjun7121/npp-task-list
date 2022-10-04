@@ -44,7 +44,7 @@ e_config_load_result load_config_file()
 	if (config_file!=NULL)
 	{
 		const size_t k_buffer_size = 1024;
-		char buffer[k_buffer_size];
+		char buffer[k_buffer_size]{};
 		size_t bytes_read = 0;
 		size_t buffer_space = k_buffer_size - 1;
 		size_t bytes_to_read;

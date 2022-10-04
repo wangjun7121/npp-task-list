@@ -15,10 +15,12 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-#ifndef GOTILINE_DLG_H
-#define GOTILINE_DLG_H
+#ifndef TASKLIST_DLG_H
+#define TASKLIST_DLG_H
 
 #include "DockingDlgInterface.h"
+#include "Sci_Position.h"
+#include "PluginDefinition.h"
 #include "../resources/resource.h"
 #include "PluginDefinition.h"
 #include <codecvt>
@@ -27,7 +29,8 @@ typedef struct
 {
 	char* text;
 	HWND hScintilla;
-	long startPosition, endPosition;
+	Sci_PositionCR startPosition;
+	Sci_PositionCR endPosition;
 } TodoItem;
 
 #include <list>
@@ -64,9 +67,7 @@ public :
 			return;
 		}
 
-		//prepare for ut8 conversion
-		using convert_typeX = std::codecvt_utf8<wchar_t>;
-		std::wstring_convert<convert_typeX, wchar_t> converterX;
+
 		//add list items LB_ADDSTRING
 		for (const auto &it : items)
 		{
@@ -76,12 +77,16 @@ public :
 	};
 
 protected :
-	virtual INT_PTR CALLBACK run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam);
+	virtual intptr_t CALLBACK run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam) override;
 
 private :
+	//prepare for ut8 conversion
+	using convert_typeX = std::codecvt_utf8<wchar_t>;
+	std::wstring_convert<convert_typeX, wchar_t> converterX;
+
 	std::vector<TodoItem> todoItems;
 	HBRUSH hbrBackgnd = NULL;
 	HWND GetCurScintilla();
 };
 
-#endif //GOTILINE_DLG_H
+#endif //TASKLIST_DLG_H

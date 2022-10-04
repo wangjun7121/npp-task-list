@@ -28,8 +28,7 @@
 HINSTANCE	g_hInstance = NULL;
 NppData		g_NppData;
 
-//TODO: refactor/rename
-TaskListDlg _goToLine;
+TaskListDlg _taskList;
 AboutDialog _aboutDlg;
 
 UINT_PTR OUTBOUND_TIMER_ID = 98712323;
@@ -44,7 +43,7 @@ FuncItem funcItem[nbFunc];
 //
 NppData nppData;
 
-#define DOCKABLE_DEMO_INDEX 15
+constexpr auto DOCKABLE_DEMO_INDEX = 15;
 
 void reload_config_file()
 {
@@ -70,7 +69,7 @@ void pluginInit(HINSTANCE hModule)
 	g_hInstance = hModule;
 
 	// Initialize dockable demo dialog
-	_goToLine.init(hModule, NULL);
+	_taskList.init(hModule, NULL);
 	reload_config_file();
 	
 }
@@ -162,7 +161,7 @@ VOID CALLBACK MyTimerProc(
 	UINT /*idTimer*/,     // timer identifier 
 	DWORD /*dwTime*/)     // current system time 
 {
-	if (!_goToLine.isCreated())
+	if (!_taskList.isCreated())
 		return;
 
 
@@ -205,14 +204,13 @@ VOID CALLBACK MyTimerProc(
 		//sprintf(search_pattern_2, "%s.*$", keyword);
 		sprintf(search_pattern_2, ".*$");
 
-		Sci_TextToFind search;
+		Sci_TextToFind search{};
 		search.lpstrText = search_pattern_1;
 		search.chrg.cpMin = 0;
-		search.chrg.cpMax = static_cast<long>( length );
-		int len;
-		//int totalLen = 0;
-		Sci_TextRange result;
-		TodoItem item;
+		search.chrg.cpMax = static_cast<Sci_PositionCR>( length );
+		Sci_PositionCR len = 0;
+		Sci_TextRange result{};
+		TodoItem item{};
 		item.hScintilla = curScintilla;
 
 		while( ::SendMessage(curScintilla, SCI_FINDTEXT, SCFIND_MATCHCASE | SCFIND_WHOLEWORD, (LPARAM)&search) > -1 )
@@ -222,7 +220,7 @@ VOID CALLBACK MyTimerProc(
 			search.chrg.cpMin = search.chrgText.cpMin;
 			::SendMessage(curScintilla, SCI_FINDTEXT, SCFIND_REGEXP, (LPARAM)&search);
 			//get text and add it to list
-			len = search.chrgText.cpMax - search.chrgText.cpMin + 1; //+1 for \0
+			len = (search.chrgText.cpMax - search.chrgText.cpMin) + 1; //+1 for \0
 			result.chrg = search.chrgText;
 			result.lpstrText = new char[len];
 			::SendMessage(curScintilla, SCI_GETTEXTRANGE, NULL, (LPARAM)&result);
@@ -240,7 +238,7 @@ VOID CALLBACK MyTimerProc(
 	}
 
 	//display all todo's
-	_goToLine.SetList(todos);
+	_taskList.SetList(todos);
 	
 	//cleanup list
 	for (const auto &it : todos)
@@ -287,22 +285,22 @@ void displayAboutDialog()
 // - please see DemoDlg.h and DemoDlg.cpp to have more informations.
 void OpenTaskListDockableDlg()
 {
-	_goToLine.setParent(nppData._nppHandle);
+	_taskList.setParent(nppData._nppHandle);
 	tTbData	data = {0};
 
-	if (!_goToLine.isCreated())
+	if (!_taskList.isCreated())
 	{
-		_goToLine.create(&data);
+		_taskList.create(&data);
 
 		// define the default docking behaviour
 		data.uMask = DWS_DF_CONT_RIGHT;
 
-		data.pszModuleName = _goToLine.getPluginFileName();
+		data.pszModuleName = _taskList.getPluginFileName();
 
 		// the dlgDlg should be the index of funcItem where the current function pointer is
 		// in this case is DOCKABLE_DEMO_INDEX
 		data.dlgID = DOCKABLE_DEMO_INDEX;
 		::SendMessage(nppData._nppHandle, NPPM_DMMREGASDCKDLG, 0, (LPARAM)&data);
 	}
-	_goToLine.display();
+	_taskList.display();
 }

@@ -2,8 +2,8 @@ version: 2.4.{build}
 
 environment:
   matrix:
-    - PlatformToolset: v142
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+    - PlatformToolset: v143
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
 
 
 platform:
@@ -28,6 +28,7 @@ install:
 
     - if "%PlatformToolset%"=="v141_xp" call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" %archi%
     - if "%PlatformToolset%"=="v142" call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" %archi%
+    - if "%PlatformToolset%"=="v143" call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" %archi%
 
 
 build_script:
@@ -42,7 +43,7 @@ after_build:
             Push-AppveyorArtifact "bin\$env:PLATFORM_INPUT\NppTaskList.dll" -FileName NppTaskList.dll
         }
 
-        if ($($env:APPVEYOR_REPO_TAG) -eq "true" -and $env:CONFIGURATION -eq "Release" -and $env:PLATFORMTOOLSET -eq "v142") {
+        if ($($env:APPVEYOR_REPO_TAG) -eq "true" -and $env:CONFIGURATION -eq "Release" -and $env:PLATFORMTOOLSET -eq "v143") {
                 $ZipFileName = "NppTaskList_$($env:APPVEYOR_REPO_TAG_NAME)_$($env:PLATFORM_INPUT).zip"
                 7z a $ZipFileName .\bin\$env:PLATFORM_INPUT\NppTaskList.dll
                 7z a $ZipFileName config\npp_task_list.cfg
@@ -62,5 +63,5 @@ deploy:
     force_update: true
     on:
         appveyor_repo_tag: true
-        PlatformToolset: v142
+        PlatformToolset: v143
         configuration: Release

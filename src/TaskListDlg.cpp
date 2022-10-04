@@ -20,7 +20,7 @@
 
 extern NppData nppData;
 
-INT_PTR CALLBACK TaskListDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam)
+intptr_t CALLBACK TaskListDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message) 
 	{
@@ -32,9 +32,9 @@ INT_PTR CALLBACK TaskListDlg::run_dlgProc(UINT message, WPARAM wParam, LPARAM lP
 					return FALSE;
 
 				//get selected item
-				LRESULT index;
+				LRESULT index = ::SendMessage((HWND)lParam, LB_GETCURSEL, NULL, NULL);
 
-				if (LB_ERR != (index = ::SendMessage((HWND)lParam, LB_GETCURSEL, NULL, NULL))) {
+				if (LB_ERR != index ) {
 					TodoItem item = todoItems[index];
 
 					//make sure the line is visible
