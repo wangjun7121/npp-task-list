@@ -93,7 +93,7 @@ protected :
 	generic_string _pluginName;
 	bool _isClosed = false;
 
-	virtual intptr_t CALLBACK run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam) {
+	virtual intptr_t CALLBACK run_dlgProc(UINT message, WPARAM , LPARAM lParam) {
 		switch (message)
 		{
 			case WM_NOTIFY: 
