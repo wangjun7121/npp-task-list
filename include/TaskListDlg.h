@@ -20,6 +20,7 @@
 
 #include "DockingDlgInterface.h"
 #include "../resources/resource.h"
+#include "PluginDefinition.h"
 #include <codecvt>
 
 typedef struct
@@ -54,7 +55,14 @@ public :
 			return;
 		//clear list LB_RESETCONTENT
 		::SendMessage( _hList, LB_RESETCONTENT, NULL, NULL );
-		todoItems.clear();
+		if ( !todoItems.empty() )
+		{
+		// "if" branch replaces previous todoItems.clear(); to address the following issue:
+		// https://community.notepad-plus-plus.org/topic/23236/npp-task-list-plugin-window-overwrites/5
+			todoItems.clear();
+			findTasks();
+			return;
+		}
 
 		//prepare for ut8 conversion
 		using convert_typeX = std::codecvt_utf8<wchar_t>;
