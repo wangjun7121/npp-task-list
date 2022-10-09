@@ -33,7 +33,7 @@ jobs:
           name: NppTaskList_${{ steps.tagName.outputs.tag }}_${{ matrix.build_platform }}
           path: |
                 bin\${{ matrix.build_platform }}\NppTaskList.dll
-                *\config\npp_task_list.cfg
+                "**\config\npp_task_list.cfg"
 
     - name: Create release on tagging
       uses: softprops/action-gh-release@v1
