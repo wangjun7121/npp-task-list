@@ -30,8 +30,8 @@ jobs:
       if: matrix.build_configuration == 'Release'
       working-directory: .
       run: |
-           7z a NppTaskList_${{ steps.tagName.outputs.tag }}_${{ matrix.build_platform }} .\bin\$env:PLATFORM_INPUT\NppTaskList.dll
-           7z a NppTaskList_${{ steps.tagName.outputs.tag }}_${{ matrix.build_platform }} config\npp_task_list.cfg
+           7z a "NppTaskList_${{ steps.tagName.outputs.tag }}_${{ matrix.build_platform }}.zip" .\bin\${{ matrix.build_platform }}\NppTaskList.dll
+           7z a "NppTaskList_${{ steps.tagName.outputs.tag }}_${{ matrix.build_platform }}.zip" config\npp_task_list.cfg
 
     - name: Archive artifacts for ${{ matrix.build_platform }}
       if: matrix.build_configuration == 'Release'
