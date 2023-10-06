@@ -237,7 +237,7 @@ VOID CALLBACK MyTimerProc(
 		}
 	}
 	//display all todo's
-	if (_taskList.concatenateItems(todos) != _taskList.todoItemsStr) {
+	if (_taskList.itemsFingerprint(todos) != _taskList.todoItemsFingerprint) {
 		_taskList.SetList(todos);
 	}
 	

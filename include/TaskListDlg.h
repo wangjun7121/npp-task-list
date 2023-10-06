@@ -50,7 +50,7 @@ public :
 	void setParent(HWND parent2set){
 		_hParent = parent2set;
 	};
-	std::string concatenateItems(const std::list<TodoItem>& itemList)
+	std::string itemsFingerprint(const std::list<TodoItem>& itemList)
 	{
 		// Create an empty string to store the concatenated content.
 		std::string concatenatedText;
@@ -63,11 +63,11 @@ public :
 		return concatenatedText;
 	}
 
-	std::string todoItemsStr;
+	std::string todoItemsFingerprint;
 
 	void SetList(const std::list<TodoItem>& items)
 	{
-		todoItemsStr = concatenateItems(items);
+		todoItemsFingerprint = itemsFingerprint(items);
 		
 		HWND _hList = ::GetDlgItem( _hSelf, ID_TODO_LIST );
 		if ( !_hList )
@@ -79,7 +79,7 @@ public :
 		// "if" branch replaces previous todoItems.clear(); to address the following issue:
 		// https://community.notepad-plus-plus.org/topic/23236/npp-task-list-plugin-window-overwrites/5
 			todoItems.clear();
-			todoItemsStr = "";
+			todoItemsFingerprint = "";
 			findTasks();
 			return;
 		}
