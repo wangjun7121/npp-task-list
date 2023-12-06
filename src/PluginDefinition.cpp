@@ -236,9 +236,10 @@ VOID CALLBACK MyTimerProc(
 			search.chrg.cpMin = search.chrgText.cpMax + 1;
 		}
 	}
-
 	//display all todo's
-	_taskList.SetList(todos);
+	if (_taskList.itemsFingerprint(todos) != _taskList.todoItemsFingerprint) {
+		_taskList.SetList(todos);
+	}
 	
 	//cleanup list
 	for (const auto &it : todos)
