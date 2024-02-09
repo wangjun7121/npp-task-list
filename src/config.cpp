@@ -16,7 +16,7 @@ char default_config_v1[]= "version=\n1\n\nkeywords=\nTODO:";
 #define default_config default_config_v1
 const int k_current_version= 1;
 
-const char *k_config_file_path="./plugins/config/npp_task_list.cfg";
+const char *k_config_file_path="./plugins/NppTaskList/config/npp_task_list.cfg";
 
 // globals
 
@@ -43,13 +43,13 @@ e_config_load_result load_config_file()
 
 	if (config_file!=NULL)
 	{
-		const int k_buffer_size= 1024;
-		char buffer[k_buffer_size];
-		int bytes_read= 0;
-		int buffer_space= k_buffer_size-1;
-		int bytes_to_read;
-		char *current_position= buffer;
-		int left_over_length= 0;
+		const size_t k_buffer_size = 1024;
+		char buffer[k_buffer_size]{};
+		size_t bytes_read = 0;
+		size_t buffer_space = k_buffer_size - 1;
+		size_t bytes_to_read;
+		char *current_position = buffer;
+		size_t left_over_length = 0;
 
 
 		do
@@ -124,7 +124,7 @@ e_config_load_result load_config_file()
 			newline_position= strchr(current_position, '\n');
 		}
 
-		if (success && current_position-default_config < strlen(default_config))
+		if (success && static_cast<size_t>(current_position-default_config) < strlen(default_config))
 		{
 			success&= handle_string(current_position);
 		}
@@ -177,7 +177,7 @@ static bool handle_string(
 	}
 	else
 	{
-		int string_length= strlen(string);
+		size_t string_length= strlen(string);
 		if (string_length==0) // double newline, reset state to invalid so we can look for a new config value
 		{
 			g_current_config_value= _config_value_invalid;

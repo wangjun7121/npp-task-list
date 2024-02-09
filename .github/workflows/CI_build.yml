@@ -1,0 +1,47 @@
+name: CI_build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+    strategy:
+      max-parallel: 6
+      matrix:
+        build_configuration: [Release, Debug]
+        build_platform: [x64, Win32, ARM64]
+        
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v2
+
+    - name: MSBuild of plugin dll
+      working-directory: .
+      run: msbuild NppTaskList.vcxproj /m /p:configuration="${{ matrix.build_configuration }}" /p:platform="${{ matrix.build_platform }}" /p:PlatformToolset="v143"
+
+    - uses: olegtarasov/get-tag@v2.1.2
+      id: tagName
+
+    - name: Create release zip
+      if: matrix.build_configuration == 'Release'
+      working-directory: .
+      run: |
+           7z a "NppTaskList_${{ steps.tagName.outputs.tag }}_${{ matrix.build_platform }}.zip" .\bin\${{ matrix.build_platform }}\NppTaskList.dll
+           7z a "NppTaskList_${{ steps.tagName.outputs.tag }}_${{ matrix.build_platform }}.zip" config\npp_task_list.cfg
+
+    - name: Archive artifacts for ${{ matrix.build_platform }}
+      if: matrix.build_configuration == 'Release'
+      uses: actions/upload-artifact@v4
+      with:
+          name: NppTaskList_${{ steps.tagName.outputs.tag }}_${{ matrix.build_platform }}
+          path: NppTaskList_${{ steps.tagName.outputs.tag }}_${{ matrix.build_platform }}.zip
+
+    - name: Create release on tagging
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/') && matrix.build_configuration == 'Release'
+      with:
+          files: NppTaskList_${{ steps.tagName.outputs.tag }}_${{ matrix.build_platform }}.zip

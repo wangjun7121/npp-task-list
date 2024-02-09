@@ -40,14 +40,14 @@ const TCHAR NPP_PLUGIN_NAME[] = TEXT("Task List Debug");
 //
 // Here define the number of your plugin commands
 //
-const int nbFunc = 2;
+const int nbFunc = 3;
 
 
 //
-/// Initialization of your plugin data
+// Initialization of your plugin data
 // It will be called while plugin loading
 //
-void pluginInit(HANDLE hModule);
+void pluginInit(HINSTANCE hModule);
 
 //
 // Cleaning of your plugin
@@ -58,7 +58,7 @@ void pluginCleanUp();
 //
 //Initialization of your plugin commands
 //
-void commandMenuInit();
+void commandMenuInit(NppData nppData);
 
 //
 //Clean up your plugin commands allocation (if any)
@@ -75,15 +75,12 @@ bool setCommand(size_t index, TCHAR *cmdName, PFUNCPLUGINCMD pFunc, ShortcutKey 
 // Your plugin command functions
 //
 void displayDialog();
+void displayAboutDialog();
 
 // Helper functions
 
-//converts a char* to a wide character string
-//note: the caller is responsible for cleaning up the wide character string when they are finished using ::SysFreeString(..)
-bool CharToWideChar( const char* _inString, BSTR* _out );
-
 void findTasks();
 
-void DockableDlgDemo();
+void OpenTaskListDockableDlg();
 
 #endif //PLUGINDEFINITION_H

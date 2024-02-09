@@ -1,0 +1,13 @@
+*.exp
+*.lib
+*.opensdf
+*.sdf
+*.suo
+Debug
+Release
+bin
+.vs
+*.vcxproj.user
+*.vcxproj.filters
+*.sln
+*.aps

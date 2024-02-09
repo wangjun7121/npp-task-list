@@ -21,9 +21,9 @@ extern FuncItem funcItem[nbFunc];
 extern NppData nppData;
 
 
-BOOL APIENTRY DllMain( HANDLE hModule, 
+BOOL APIENTRY DllMain( HINSTANCE hModule,
                        DWORD  reasonForCall, 
-                       LPVOID lpReserved )
+                       LPVOID /*lpReserved*/ )
 {
     switch (reasonForCall)
     {
@@ -50,7 +50,7 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 extern "C" __declspec(dllexport) void setInfo(NppData notpadPlusData)
 {
 	nppData = notpadPlusData;
-	commandMenuInit();
+	commandMenuInit(notpadPlusData);
 }
 
 extern "C" __declspec(dllexport) const TCHAR * getName()
@@ -89,7 +89,7 @@ extern "C" __declspec(dllexport) void beNotified(SCNotification *notifyCode)
 // Please let me know if you need to access to some messages :
 // http://sourceforge.net/forum/forum.php?forum_id=482781
 //
-extern "C" __declspec(dllexport) LRESULT messageProc(UINT Message, WPARAM wParam, LPARAM lParam)
+extern "C" __declspec(dllexport) LRESULT messageProc(UINT /*Message*/, WPARAM /*wParam*/, LPARAM /*lParam*/)
 {/*
 	if (Message == WM_MOVE)
 	{

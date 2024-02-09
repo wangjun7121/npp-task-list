@@ -15,17 +15,22 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-#ifndef GOTILINE_DLG_H
-#define GOTILINE_DLG_H
+#ifndef TASKLIST_DLG_H
+#define TASKLIST_DLG_H
 
 #include "DockingDlgInterface.h"
-#include "resource.h"
+#include "Sci_Position.h"
+#include "PluginDefinition.h"
+#include "../resources/resource.h"
+#include "PluginDefinition.h"
+#include <codecvt>
 
 typedef struct
 {
 	char* text;
 	HWND hScintilla;
-	long startPosition, endPosition;
+	Sci_PositionCR startPosition;
+	Sci_PositionCR endPosition;
 } TodoItem;
 
 #include <list>
@@ -34,7 +39,7 @@ typedef struct
 class TaskListDlg : public DockingDlgInterface
 {
 public :
-	TaskListDlg() : DockingDlgInterface(IDD_PLUGINGOLINE_DEMO){};
+	TaskListDlg() : DockingDlgInterface(IDD_TODOLIST_DIALOG){};
 
     virtual void display(bool toShow = true) const {
         DockingDlgInterface::display(toShow);
@@ -45,29 +50,60 @@ public :
 	void setParent(HWND parent2set){
 		_hParent = parent2set;
 	};
+	std::string itemsFingerprint(const std::list<TodoItem>& itemList)
+	{
+		// Create an empty string to store the concatenated content.
+		std::string concatenatedText;
+
+		// Iterate through the sorted list and concatenate the 'text' members.
+		for (const TodoItem& item : itemList) {
+			concatenatedText += item.text;
+		}
+
+		return concatenatedText;
+	}
+
+	std::string todoItemsFingerprint;
 
 	void SetList(const std::list<TodoItem>& items)
 	{
+		todoItemsFingerprint = itemsFingerprint(items);
+		
 		HWND _hList = ::GetDlgItem( _hSelf, ID_TODO_LIST );
 		if ( !_hList )
 			return;
-        //clear list LB_RESETCONTENT
-		::SendMessageA( _hList, LB_RESETCONTENT, NULL, NULL );
-		todoItems.clear();
-		//add list items LB_ADDSTRING
-		std::list<TodoItem>::const_iterator it;
-		for ( it = items.begin(); it != items.end(); ++it )
+		//clear list LB_RESETCONTENT
+		::SendMessage( _hList, LB_RESETCONTENT, NULL, NULL );
+		if ( !todoItems.empty() )
 		{
-			::SendMessageA( _hList, LB_ADDSTRING, NULL, (LPARAM)it->text );
-			todoItems.push_back(*it);
+		// "if" branch replaces previous todoItems.clear(); to address the following issue:
+		// https://community.notepad-plus-plus.org/topic/23236/npp-task-list-plugin-window-overwrites/5
+			todoItems.clear();
+			todoItemsFingerprint = "";
+			findTasks();
+			return;
 		}
-    };
+
+
+		//add list items LB_ADDSTRING
+		for (const auto &it : items)
+		{
+			::SendMessage( _hList, LB_ADDSTRING, NULL, (LPARAM)converterX.from_bytes(it.text).c_str());
+			todoItems.push_back(it);
+		}
+	};
 
 protected :
-	virtual BOOL CALLBACK run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam);
+	virtual intptr_t CALLBACK run_dlgProc(UINT message, WPARAM wParam, LPARAM lParam) override;
 
 private :
+	//prepare for ut8 conversion
+	using convert_typeX = std::codecvt_utf8<wchar_t>;
+	std::wstring_convert<convert_typeX, wchar_t> converterX;
+
 	std::vector<TodoItem> todoItems;
+	HBRUSH hbrBackgnd = NULL;
+	HWND GetCurScintilla();
 };
 
-#endif //GOTILINE_DLG_H
+#endif //TASKLIST_DLG_H
