@@ -41,7 +41,7 @@ jobs:
           path: NppTaskList_${{ steps.tagName.outputs.tag }}_${{ matrix.build_platform }}.zip
 
     - name: Create release on tagging
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       if: startsWith(github.ref, 'refs/tags/') && matrix.build_configuration == 'Release'
       with:
           files: NppTaskList_${{ steps.tagName.outputs.tag }}_${{ matrix.build_platform }}.zip
